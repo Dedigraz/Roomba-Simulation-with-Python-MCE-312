@@ -5,11 +5,10 @@
 # Time:
 import math
 import random
+from typing import List
 from matplotlib.pyplot import show
 
-import numpy
-
-
+import numpy as np
 
 import ps2_visualize
 import pylab
@@ -74,9 +73,16 @@ class RectangularRoom(object):
         
         self.width = width
         self.height = height
-        Tiles = zip(range(0,width+1), range(0, height+1))
-        self.Tiles = set(Tiles)
-        self.cleanedTiles = {}
+        self.Tiles =  np.asarray(list(zip(range(0,width+1), range(0, height+1))))
+        self.cleanedTiles = np.array([])
+
+    def getTileFromPos(self, pos):
+        """
+        Get the current tile that the robot is under from its position
+
+        returns a tuple of int
+        """
+        return (pos.x//1,pos.y//1)
     
     def cleanTileAtPosition(self, pos):
         """
@@ -86,7 +92,7 @@ class RectangularRoom(object):
 
         pos: a Position
         """
-        self.cleanedTiles.add((pos.x//1, pos.y//1))
+        np.append(self.cleanedTiles, self.getTileFromPos(pos))
 
     def isTileCleaned(self, m, n):
         """
@@ -109,7 +115,7 @@ class RectangularRoom(object):
 
         returns: an integer
         """
-        return len(self.Tiles)
+        return np.prod(self.Tiles.shape)
 
     def getNumCleanedTiles(self):
         """
@@ -117,7 +123,7 @@ class RectangularRoom(object):
 
         returns: an integer
         """
-        return len(self.cleanedTiles)
+        return np.prod(self.cleanedTiles.shape)
 
     def getRandomPosition(self):
         """
@@ -140,12 +146,12 @@ class RectangularRoom(object):
         #    return False
         #else:
         #    return True
-        if pos.x and pos.y >= 0 and pos.x <= self.width and pos.y<=self.height:
+        if pos.x>= 0 and pos.y >= 0 and pos.x <= self.width and pos.y<=self.height:
             return True
         else:
             return False
     def getUncleanTile(self):
-        unclean =  self.Tiles.difference(self.cleanedTiles)
+        unclean =  set(self.Tiles).difference(self.cleanedTiles)
         if unclean != {}:
             return unclean.pop()
         else:
@@ -174,8 +180,10 @@ class Robot(object):
         """
         self.room = RectangularRoom(room.width, room.height)
         self.speed = speed
-        self.position = self.room.getRandomPosition()
+        self.Position = self.room.getRandomPosition()
         self.direction = random.randrange(0, 361);
+
+        self.room.cleanTileAtPosition(self.Position)
 
     def getRobotPosition(self):
         """
@@ -200,7 +208,7 @@ class Robot(object):
 
         position: a Position object.
         """
-        self.position = position
+        self.Position = position
 
     def setRobotDirection(self, direction):
         """
@@ -217,24 +225,9 @@ class Robot(object):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        OldPos = self.position
-        
-        # we would try updating the position and seeing if the robot voids any of our rules.
+        self.setRobotPosition(self.Position.getNewPosition(self.direction, self.speed))
+        self.room.cleanTileAtPosition(self.Position)
 
-        self.position.getNewPosition(self.direction, self.speed)
-        pos = self.position
-        tile = (pos.x//1, pos.y//1)
-
-        #if bot is not in the room and is on a clean tile teleport him to an unclean tile
-        if (not self.room.isPositionInRoom(pos))  :
-            self.setRobotPosition(OldPos)
-            self.setRobotDirection((self.getRobotDirection + 90)%360)
-        elif self.room.isTileCleaned(tile):
-            self.position.x, self.position.y = self.room.getUncleanTile()
-            self.room.cleanTileAtPosition(self.position)
-        else :
-            self.setRobotPosition(self.position)
-            self.room.cleanTileAtPosition(self.position)
 
 # === Problem 2
 class StandardRobot(Robot):
@@ -278,14 +271,13 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     anim = ps2_visualize.RobotVisualization(num_robots, width, height)
     room = RectangularRoom(width,height)
     robots = []
-    j = 0
-    while j < num_robots:
-        robot = robot_type(room, speed)
-        robots.append(robot)
-    i = 0
+
+
+    for i in range(num_robots):
+        robots.append(robot_type(room, speed))
     times =  []
 
-    while i < num_trials:
+    for i in range(num_trials):
         timesteps = 0
         while(len(room.cleanedTiles) != (len(room.Tiles) * min_coverage)):
             for r in robots : #we're going to loop thru each robot and update pos
@@ -293,10 +285,10 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
 
             anim.update(room, robots)
             timesteps += 1
-        i+=1
+
         times.append(timesteps)
-    
-    anim.done()
+        anim.done()
+
     return numpy.mean(times)
 
 # === Problem 4
