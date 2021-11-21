@@ -239,14 +239,41 @@ class StandardRobot(Robot):
     """
     def __init__(self, room, speed):
         super().__init__(room, speed)
-    #def updatePositionAndClean(self):
-    #    """
-    #    Simulate the passage of a single time-step.
+    def isFutureTileClean(self,pos):
+        """
+        Checks if the robot continuing on his present trajectory,
+        would lead him to an alreay cleaned Tile.
 
-    #    Move the robot to a new position and mark the tile it is on as having
-    #    been cleaned.
-    #    """
-    #    Robot.updatePositionAndClean(self)
+        Parameters: Takes a Position as an argument
+
+        Returns: bool
+        """
+        futurePos = pos.getNewPosition(self.direction, self.speed)
+        futureTile = self.room.getTileFromPos(futurePos)
+        if futureTile in self.room.cleanedTiles and futureTile in self.room.Tiles:
+            return True
+        else:
+            return False
+        
+##    def correctRotation(self):
+##        """
+##        Checks if the robot is at an edge,
+##        and faces it in the direction of a nearby clean Tile if it is.
+##        """
+##        x,y = self.Position
+##        if
+        
+    def updatePositionAndClean(self):
+        """
+        Simulate the passage of a single time-step.
+
+        Move the robot to a new position and mark the tile it is on as having
+        been cleaned.
+        """
+        if not isFutureTileClean(self.Position):
+            self.Position = self.Positon.getNewPosition
+            self.room.cleanTileAtPosition(self.Position)  
+        pass
 
 # === Problem 3
 
@@ -293,10 +320,10 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
 
 # === Problem 4
 #
-# 1) How long does it take to clean 80% of a 20×20 room with each of 1-10 robots?
+# 1) How long does it take to clean 80% of a 20Ã—20 room with each of 1-10 robots?
 #
 # 2) How long does it take two robots to clean 80% of rooms with dimensions 
-#	 20×20, 25×16, 40×10, 50×8, 80×5, and 100×4?
+#	 20Ã—20, 25Ã—16, 40Ã—10, 50Ã—8, 80Ã—5, and 100Ã—4?
 
 def showPlot1():
     """
