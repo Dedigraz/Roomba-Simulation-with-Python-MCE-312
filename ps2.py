@@ -5,10 +5,10 @@
 # Time:
 import math
 import random
-from typing import List
-from matplotlib.pyplot import show
+import math
 
 import numpy as np
+from numpy.ma import empty
 
 import ps2_visualize
 import pylab
@@ -76,13 +76,13 @@ class RectangularRoom(object):
         self.Tiles =  np.asarray(list(zip(range(0,width+1), range(0, height+1))))
         self.cleanedTiles = np.array([])
 
-    def getTileFromPos(self, pos):
+    def getTileFromPos(self, pos:Position):
         """
         Get the current tile that the robot is under from its position
 
         returns a tuple of int
         """
-        return (pos.x//1,pos.y//1)
+        return (math.floor(pos.getX()), math.floor(pos.getY()))
     
     def cleanTileAtPosition(self, pos):
         """
@@ -150,12 +150,9 @@ class RectangularRoom(object):
             return True
         else:
             return False
-    def getUncleanTile(self):
-        unclean =  set(self.Tiles).difference(self.cleanedTiles)
-        if unclean != {}:
-            return unclean.pop()
-        else:
-            raise Exception
+    def getUncleanTiles(self):
+        ## update to use numpy's built in difference method
+        return np.asarray(np.setdiff1d(self.Tiles, self.cleanedTiles))
 
 
 
@@ -225,8 +222,11 @@ class Robot(object):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        self.setRobotPosition(self.Position.getNewPosition(self.direction, self.speed))
-        self.room.cleanTileAtPosition(self.Position)
+        pass
+    def moveRobotToTile(self, tile):
+        pos = Position(tile[0], tile[1])
+        self.setRobotPosition(pos)
+
 
 
 # === Problem 2
@@ -239,7 +239,7 @@ class StandardRobot(Robot):
     """
     def __init__(self, room, speed):
         super().__init__(room, speed)
-    def isFutureTileClean(self,pos):
+    def canMoveToFutureTile(self,pos):
         """
         Checks if the robot continuing on his present trajectory,
         would lead him to an alreay cleaned Tile.
@@ -249,20 +249,50 @@ class StandardRobot(Robot):
         Returns: bool
         """
         futurePos = pos.getNewPosition(self.direction, self.speed)
-        futureTile = self.room.getTileFromPos(futurePos)
-        if futureTile in self.room.cleanedTiles and futureTile in self.room.Tiles:
+        w = self.room.width
+        h = self.room.height
+
+        if futurePos.x >= 0 and futurePos.y >= 0 and futurePos.x <= w and futurePos.y <= h:
             return True
         else:
             return False
-        
-##    def correctRotation(self):
-##        """
-##        Checks if the robot is at an edge,
-##        and faces it in the direction of a nearby clean Tile if it is.
-##        """
-##        x,y = self.Position
-##        if
-        
+    
+    def closeTiles(self, pos):
+        tile = self.room.getTileFromPos(pos)
+        w = range(tile[0] - 1, tile[0] + 2)
+        h = range(tile[1] -1, tile[1] + 2)
+        surroundings = np.asarray(list(zip(w, h)))
+        uncleanTiles = self.room.getUncleanTiles()
+        surroundingTiles = np.intersect1d(uncleanTiles, surroundings)
+        return surroundingTiles
+
+    def getDirectionToTile(self, pos, tile):
+        refTile = self.room.getTileFromPos(pos)
+
+        if(refTile[0] > tile[0] and refTile[1] < tile[1]):
+            return 315
+        elif refTile[0] == tile[0] and refTile[1] < tile[1]:
+            return 0
+        elif refTile[0] < tile[0] and refTile[1] < tile[1]:
+            return 45
+        elif refTile[0] > tile[0] and refTile[1] == tile[1]:
+            return 270
+        elif refTile[0] < tile[0] and refTile[1] == tile[1]:
+            return 90
+        elif refTile[0] > tile[0] and refTile[1] > tile[1]:
+            return 225
+        elif refTile[0] == tile[0] and refTile[1] > tile[1]:
+            return 180
+        elif refTile[0] < tile[0] and refTile[1] > tile[1]:
+            return 135
+
+    def isAtEdge(self):
+        x = self.Position.getX()
+        y = self.Position.getY()
+        if x == 0 or x == self.room.width or y == 0 or y == self.room.height:
+            return True
+        else:
+            return False
     def updatePositionAndClean(self):
         """
         Simulate the passage of a single time-step.
@@ -270,10 +300,16 @@ class StandardRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        if not isFutureTileClean(self.Position):
-            self.Position = self.Positon.getNewPosition
-            self.room.cleanTileAtPosition(self.Position)  
-        pass
+        uncleanTile = self.room.getUncleanTiles()[0]
+
+        if self.canMoveToFutureTile(self.Position):
+            self.setRobotPosition(self.Position.getNewPosition(self.direction, self.speed))
+            self.room.cleanTileAtPosition(self.Position)
+        elif len(self.closeTiles(self.Position)) != 0:
+            self.setRobotDirection(random.randrange(1, 361, step = 45))
+        elif self.closeTiles(self.Position) == []:
+            self.moveRobotToTile(uncleanTile)
+            self.room.cleanTileAtPosition(self.Position)
 
 # === Problem 3
 
@@ -316,7 +352,7 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
         times.append(timesteps)
         anim.done()
 
-    return numpy.mean(times)
+    return np.mean(times)
 
 # === Problem 4
 #
