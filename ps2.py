@@ -169,7 +169,7 @@ class RectangularRoom(object):
             return False
     def getUncleanTiles(self):
         ## update to use numpy's built in difference method
-        return set(self.Tiles).difference(self.cleanedTiles)
+        return set(self.Tiles).difference(set(self.cleanedTiles))
 
 
 
