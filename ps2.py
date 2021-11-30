@@ -62,10 +62,10 @@ class Tile(object):
         self.y = y
 
 def generateTiles(width:int,height:int,lw =0, lh =0 ):
-        Tiles =np.array([])
+        Tiles =[]
         for x in range(lw,width+1):
             for y in range(lh,height+1):
-                np.append(Tiles,(Tile(x,y)))
+                Tiles.append(Tile(x,y))
         return Tiles
 
 # === Problems 1
@@ -91,7 +91,7 @@ class RectangularRoom(object):
         self.width = width
         self.height = height
         self.Tiles =  generateTiles(self.width,self.height)
-        self.cleanedTiles = np.array([])
+        self.cleanedTiles = []
 
     def getTileFromPos(self, pos:Position):
         """
@@ -109,7 +109,7 @@ class RectangularRoom(object):
 
         pos: a Position
         """
-        np.append(self.cleanedTiles, self.getTileFromPos(pos))
+        self.cleanedTiles.append(self.getTileFromPos(pos))
 
     def isTileCleaned(self, m, n):
         """
@@ -132,7 +132,7 @@ class RectangularRoom(object):
 
         returns: an integer
         """
-        return np.prod(self.Tiles.shape)
+        return len(self.Tiles)
 
     def getNumCleanedTiles(self):
         """
@@ -140,7 +140,7 @@ class RectangularRoom(object):
 
         returns: an integer
         """
-        return np.prod(self.cleanedTiles.shape)
+        return len(self.cleanedTiles)
 
     def getRandomPosition(self):
         """
@@ -169,7 +169,7 @@ class RectangularRoom(object):
             return False
     def getUncleanTiles(self):
         ## update to use numpy's built in difference method
-        return np.setdiff1d(self.Tiles, self.cleanedTiles)
+        return set(self.Tiles).difference(self.cleanedTiles)
 
 
 
@@ -241,7 +241,7 @@ class Robot(object):
         """
         pass
     def moveRobotToTile(self, tile):
-        pos = Position(tile[0], tile[1])
+        pos = Position(tile.x, tile.y)
         self.setRobotPosition(pos)
 
 
@@ -278,8 +278,8 @@ class StandardRobot(Robot):
         tile = self.room.getTileFromPos(pos)
         surroundings = generateTiles(lw = tile.x -1, width= tile.x + 2, lh= tile.y -1, height=tile.y + 2)
         uncleanTiles = self.room.getUncleanTiles()
-        surroundingTiles = np.intersect1d(uncleanTiles, surroundings)
-        return surroundingTiles
+        surroundingTiles = uncleanTiles.intersection(set(surroundings))
+        return list(surroundingTiles)
 
     def getDirectionToTile(self, pos, tile):
         refTile = self.room.getTileFromPos(pos)
@@ -315,7 +315,7 @@ class StandardRobot(Robot):
         Move the robot to a new position and mark the tile it is on as having
         been cleaned.
         """
-        uncleanTile = self.room.getUncleanTiles()[0]
+        uncleanTile = self.room.getUncleanTiles().pop()
 
         if self.canMoveToFutureTile(self.Position):
             self.setRobotPosition(self.Position.getNewPosition(self.direction, self.speed))
@@ -419,6 +419,7 @@ def showPlot2():
     pylab.xlabel("average time")
     pylab.ylabel("Room Shape")
     pylab.show()
+
 
 # === Problem 5
 
