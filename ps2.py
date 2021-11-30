@@ -51,6 +51,23 @@ class Position(object):
         new_y = old_y + delta_y
         return Position(new_x, new_y)
 
+class Tile(object):
+    """A Tile object represents a tile that is part of a RectangularTiles
+
+    Args:
+        object (Tile): Takes in the location of the tile in the tile matrix(room)
+    """
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+
+def generateTiles(width:int,height:int,lw =0, lh =0 ):
+        Tiles =np.array([])
+        for x in range(lw,width+1):
+            for y in range(lh,height+1):
+                np.append(Tiles,(Tile(x,y)))
+        return Tiles
+
 # === Problems 1
 
 class RectangularRoom(object):
@@ -73,7 +90,7 @@ class RectangularRoom(object):
         
         self.width = width
         self.height = height
-        self.Tiles =  np.asarray(list(zip(range(0,width+1), range(0, height+1))))
+        self.Tiles =  generateTiles(self.width,self.height)
         self.cleanedTiles = np.array([])
 
     def getTileFromPos(self, pos:Position):
@@ -82,7 +99,7 @@ class RectangularRoom(object):
 
         returns a tuple of int
         """
-        return (math.floor(pos.getX()), math.floor(pos.getY()))
+        return Tile(math.floor(pos.getX()), math.floor(pos.getY()))
     
     def cleanTileAtPosition(self, pos):
         """
@@ -104,7 +121,7 @@ class RectangularRoom(object):
         n: an integer
         returns: True if (m, n) is cleaned, False otherwise
         """
-        if (m,n) in self.cleanedTiles:
+        if Tile(m,n) in self.cleanedTiles:
             return True
         else:
             return False
@@ -152,7 +169,7 @@ class RectangularRoom(object):
             return False
     def getUncleanTiles(self):
         ## update to use numpy's built in difference method
-        return np.asarray(np.setdiff1d(self.Tiles, self.cleanedTiles))
+        return np.setdiff1d(self.Tiles, self.cleanedTiles)
 
 
 
@@ -175,7 +192,7 @@ class Robot(object):
         room:  a RectangularRoom object.
         speed: a float (speed > 0)
         """
-        self.room = RectangularRoom(room.width, room.height)
+        self.room = room
         self.speed = speed
         self.Position = self.room.getRandomPosition()
         self.direction = random.randrange(0, 361);
@@ -239,7 +256,7 @@ class StandardRobot(Robot):
     """
     def __init__(self, room, speed):
         super().__init__(room, speed)
-    def canMoveToFutureTile(self,pos):
+    def canMoveToFutureTile(self,pos:Position):
         """
         Checks if the robot continuing on his present trajectory,
         would lead him to an alreay cleaned Tile.
@@ -259,9 +276,7 @@ class StandardRobot(Robot):
     
     def closeTiles(self, pos):
         tile = self.room.getTileFromPos(pos)
-        w = range(tile[0] - 1, tile[0] + 2)
-        h = range(tile[1] -1, tile[1] + 2)
-        surroundings = np.asarray(list(zip(w, h)))
+        surroundings = generateTiles(lw = tile.x -1, width= tile.x + 2, lh= tile.y -1, height=tile.y + 2)
         uncleanTiles = self.room.getUncleanTiles()
         surroundingTiles = np.intersect1d(uncleanTiles, surroundings)
         return surroundingTiles
@@ -269,21 +284,21 @@ class StandardRobot(Robot):
     def getDirectionToTile(self, pos, tile):
         refTile = self.room.getTileFromPos(pos)
 
-        if(refTile[0] > tile[0] and refTile[1] < tile[1]):
+        if(refTile.x > tile.x and refTile.y < tile.y):
             return 315
-        elif refTile[0] == tile[0] and refTile[1] < tile[1]:
+        elif refTile.x == tile.x and refTile.y < tile.y:
             return 0
-        elif refTile[0] < tile[0] and refTile[1] < tile[1]:
+        elif refTile.x < tile.x and refTile.y < tile.y:
             return 45
-        elif refTile[0] > tile[0] and refTile[1] == tile[1]:
+        elif refTile.x > tile.x and refTile.y == tile.y:
             return 270
-        elif refTile[0] < tile[0] and refTile[1] == tile[1]:
+        elif refTile.x < tile.x and refTile.y == tile.y:
             return 90
-        elif refTile[0] > tile[0] and refTile[1] > tile[1]:
+        elif refTile.x > tile.x and refTile.y > tile.y:
             return 225
-        elif refTile[0] == tile[0] and refTile[1] > tile[1]:
+        elif refTile.x == tile.x  and refTile.y  > tile.y:
             return 180
-        elif refTile[0] < tile[0] and refTile[1] > tile[1]:
+        elif refTile.x < tile.x and refTile.y > tile.y:
             return 135
 
     def isAtEdge(self):
