@@ -69,7 +69,6 @@ def generateTiles(width:int,height:int,lw =0, lh =0 ):
         return Tiles
 
 # === Problems 1
-
 class RectangularRoom(object):
     """
     A RectangularRoom represents a rectangular region containing clean or dirty
@@ -382,10 +381,10 @@ def showPlot1():
     """ 
     oneR = [1,runSimulation(1,1,20,20,0.8,1,StandardRobot)]
     twoR = [2,runSimulation(2,1,20,20,0.8,1,StandardRobot)]
-    threeR = [3,runSimulation(3,1,20,20,0.8,1,StandardRobot)]
     fourR = [4, runSimulation(4,1,20,20,0.8,1,StandardRobot)]
     fiveR = [5, runSimulation(5,1,20,20,0.8,1,StandardRobot)]
     sixR = [6,runSimulation(6,1,20,20,0.8,1,StandardRobot)]
+    threeR = [3,runSimulation(3,1,20,20,0.8,1,StandardRobot)]
     sevR = [7,runSimulation(7,1,20,20,0.8,1,StandardRobot)]
     eigR = [8,runSimulation(8,1,20,20,0.8,1,StandardRobot)]
     nineR = [9,runSimulation(9,1,20,20,0.8,1,StandardRobot)]
