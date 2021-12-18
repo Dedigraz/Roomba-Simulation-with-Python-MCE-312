@@ -429,16 +429,16 @@ def showPlot1():
     """
     Produces a plot showing dependence of cleaning time on number of robots.
     """ 
-    oneR = [1,runSimulation(1,1,20,20,0.8,1,StandardRobot)]
-    twoR = [2,runSimulation(2,1,20,20,0.8,1,StandardRobot)]
-    threeR = [3,runSimulation(3,1,20,20,0.8,1,StandardRobot)]
-    fourR = [4, runSimulation(4,1,20,20,0.8,1,StandardRobot)]
-    fiveR = [5, runSimulation(5,1,20,20,0.8,1,StandardRobot)]
-    sixR = [6,runSimulation(6,1,20,20,0.8,1,StandardRobot)]
-    sevR = [7,runSimulation(7,1,20,20,0.8,1,StandardRobot)]
-    eigR = [8,runSimulation(8,1,20,20,0.8,1,StandardRobot)]
-    nineR = [9,runSimulation(9,1,20,20,0.8,1,StandardRobot)]
-    tenR =[10, runSimulation(10,1,20,20,0.8,1,StandardRobot)]
+    oneR = [1,runSimulation(1,1,20,20,0.8,2,StandardRobot)]
+    twoR = [2,runSimulation(2,1,20,20,0.8,2,StandardRobot)]
+    threeR = [3,runSimulation(3,1,20,20,0.8,2,StandardRobot)]
+    fourR = [4, runSimulation(4,1,20,20,0.8,2,StandardRobot)]
+    fiveR = [5, runSimulation(5,1,20,20,0.8,2,StandardRobot)]
+    sixR = [6,runSimulation(6,1,20,20,0.8,2,StandardRobot)]
+    sevR = [7,runSimulation(7,1,20,20,0.8,2,StandardRobot)]
+    eigR = [8,runSimulation(8,1,20,20,0.8,2,StandardRobot)]
+    nineR = [9,runSimulation(9,1,20,20,0.8,2,StandardRobot)]
+    tenR =[10, runSimulation(10,1,20,20,0.8,2,StandardRobot)]
 
     xdata = [oneR[0], twoR[0],threeR[0], fourR[0], fiveR[0], sixR[0],sevR[0], eigR[0], nineR[0], tenR[0]]
     ydata = [oneR[1], twoR[1],threeR[1], fourR[1], fiveR[1], sixR[1],sevR[1], eigR[1], nineR[1], tenR[1]]
@@ -449,29 +449,29 @@ def showPlot1():
     pylab.xlabel("Number of robots")
     pylab.show()
 
-#showPlot1()
+showPlot1()
 
 def showPlot2():
     """
     Produces a plot showing dependence of cleaning time on room shape.
     """
-    oneR = [20 * 20,runSimulation(2,1,20,20,0.8,1,StandardRobot)]
-    twoR =   [25 * 16,runSimulation(2,1,25,16,0.8,1,StandardRobot)]
-    threeR = [40 * 10,runSimulation(2,1,40,10,0.8,1,StandardRobot)]
-    fourR =  [50 * 8, runSimulation(2,1,50,8,0.8,1,StandardRobot)]
-    fiveR =  [80 * 5, runSimulation(2,1,80,5,0.8,1,StandardRobot)]
-    sixR =   [100 * 4,runSimulation(2,1,100,4,0.8,1,StandardRobot)]
+    oneR = ['20 * 20',runSimulation(2,1,20,20,0.8,2,StandardRobot)]
+    twoR =   ["25 * 16",runSimulation(2,1,25,16,0.8,2,StandardRobot)]
+    threeR = ["40 * 10",runSimulation(2,1,40,10,0.8,2,StandardRobot)]
+    fourR =  ["50 * 8", runSimulation(2,1,50,8,0.8,2,StandardRobot)]
+    fiveR =  ["80 * 5", runSimulation(2,1,80,5,0.8,2,StandardRobot)]
+    sixR =   ["100 * 4",runSimulation(2,1,100,4,0.8,2,StandardRobot)]
 
-    ydata = [oneR[0], twoR[0],threeR[0], fourR[0], fiveR[0], sixR[0]]
-    xdata = [oneR[1], twoR[1],threeR[1], fourR[1], fiveR[1], sixR[1]]
+    xdata = [oneR[0], twoR[0],threeR[0], fourR[0], fiveR[0], sixR[0]]
+    ydata = [oneR[1], twoR[1],threeR[1], fourR[1], fiveR[1], sixR[1]]
     
     pylab.plot(xdata, ydata)
     pylab.title("Time to Clean 80% of square rooms with different sizes, with 2 Robots ")
-    pylab.xlabel("Average time")
-    pylab.ylabel("Number of Tiles")
+    pylab.ylabel("Average time")
+    pylab.xlabel("Shape of Room")
     pylab.show()
 
-#showPlot2()
+showPlot2()
 # === Problem 5
 
 class RandomWalkRobot(Robot):
@@ -538,21 +538,22 @@ def showPlot3():
     Produces a plot comparing the two robot strategies.
     """
     
+    #==== Observations
     # From the plots it is obvious that the standard robot has more efficient movement 
-    # than the random walk robot, out performing it by as much as 6 times that of the 
-    # random walk robot
-    standardR = [runSimulation(2,1,15,15,0.8,1,StandardRobot),
-                 runSimulation(2,1,20,15,0.8,1,StandardRobot),
-                 runSimulation(1,1,20,20,0.8,1,StandardRobot),
-                 runSimulation(2,1,25,25,0.8,1,StandardRobot),
-                 runSimulation(2,1,35,20,0.8,1,StandardRobot)
+    # than the random walk robot, showing as much as a seven times performance
+    
+    standardR = [runSimulation(2,1,15,15,0.8,2,StandardRobot),
+                 runSimulation(2,1,20,15,0.8,2,StandardRobot),
+                 runSimulation(1,1,20,20,0.8,2,StandardRobot),
+                 runSimulation(2,1,25,25,0.8,2,StandardRobot),
+                 runSimulation(2,1,35,20,0.8,2,StandardRobot)
                  ]
     
-    RandomR = [runSimulation(2,1,15,15,0.8,1,RandomWalkRobot),
-               runSimulation(2,1,20,15,0.8,1,RandomWalkRobot),
-               runSimulation(1,1,20,20,0.8,1,RandomWalkRobot),
-               runSimulation(2,1,25,25,0.8,1,RandomWalkRobot),
-               runSimulation(2,1,35,20,0.8,1,RandomWalkRobot)
+    RandomR = [runSimulation(2,1,15,15,0.8,2,RandomWalkRobot),
+               runSimulation(2,1,20,15,0.8,2,RandomWalkRobot),
+               runSimulation(1,1,20,20,0.8,2,RandomWalkRobot),
+               runSimulation(2,1,25,25,0.8,2,RandomWalkRobot),
+               runSimulation(2,1,35,20,0.8,2,RandomWalkRobot)
                ]
     
     roomAreas = [225, 300,400, 625, 700]
