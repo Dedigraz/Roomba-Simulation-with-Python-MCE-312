@@ -537,6 +537,10 @@ def showPlot3():
     """
     Produces a plot comparing the two robot strategies.
     """
+    
+    # From the plots it is obvious that the standard robot has more efficient movement 
+    # than the random walk robot, out performing it by as much as 6 times that of the 
+    # random walk robot
     standardR = [runSimulation(2,1,15,15,0.8,1,StandardRobot),
                  runSimulation(2,1,20,15,0.8,1,StandardRobot),
                  runSimulation(1,1,20,20,0.8,1,StandardRobot),
