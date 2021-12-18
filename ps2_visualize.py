@@ -114,5 +114,6 @@ class RobotVisualization:
 
     def done(self):
         "Indicate that the animation is done so that we allow the user to close the window."
-        mainloop()
+        # mainloop()
+        self.master.destroy()
 
