@@ -1,7 +1,7 @@
 # Problem Set 6: Simulating robots
-# Name:
-# Collaborators:
-# Time:
+# Name: Ebunrere Adebanjo
+# Collaborators: Michael Agyo
+# Time: 1 1/2 hours(most likely more)
 
 import math
 import random
@@ -9,7 +9,6 @@ import random
 import ps2_visualize
 import pylab
 
-import numpy as np
 # === Provided classes
 
 class Position(object):
@@ -416,7 +415,7 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
         # anim.done()
         i += 1
 
-    return sum(times)/len(times)
+    return sum(times)/len(times) # mean time 
 
 
 # === Problem 4
@@ -538,25 +537,27 @@ def showPlot3():
     """
     Produces a plot comparing the two robot strategies.
     """
-    standardR = [[20 *20,runSimulation(1,1,20,20,0.8,3,StandardRobot)],
-                 [25 * 16,runSimulation(2,1,25,16,0.8,1,StandardRobot)],
-                 [40 * 10,runSimulation(2,1,40,10,0.8,1,StandardRobot)],
-                 [50 * 8, runSimulation(2,1,50,8,0.8,1,StandardRobot)],
-                 [80 * 5, runSimulation(2,1,80,5,0.8,1,StandardRobot)],
-                 [100 * 4,runSimulation(2,1,100,4,0.8,1,StandardRobot)]]
+    standardR = [runSimulation(2,1,15,15,0.8,1,StandardRobot),
+                 runSimulation(2,1,20,15,0.8,1,StandardRobot),
+                 runSimulation(1,1,20,20,0.8,1,StandardRobot),
+                 runSimulation(2,1,25,25,0.8,1,StandardRobot),
+                 runSimulation(2,1,35,20,0.8,1,StandardRobot)
+                 ]
     
-    RandomR = [[20 * 20,runSimulation(1,1,20,20,0.8,3,RandomWalkRobot),
-               [25 * 16,runSimulation(2,1,25,16,0.8,1,StandardRobot)],
-                [40 * 10,runSimulation(2,1,40,10,0.8,1,StandardRobot)],
-                [50 * 8, runSimulation(2,1,50,8,0.8,1,StandardRobot)],
-                [80 * 5, runSimulation(2,1,80,5,0.8,1,StandardRobot)],
-                [100 * 4,runSimulation(2,1,100,4,0.8,1,StandardRobot)]]]
+    RandomR = [runSimulation(2,1,15,15,0.8,1,RandomWalkRobot),
+               runSimulation(2,1,20,15,0.8,1,RandomWalkRobot),
+               runSimulation(1,1,20,20,0.8,1,RandomWalkRobot),
+               runSimulation(2,1,25,25,0.8,1,RandomWalkRobot),
+               runSimulation(2,1,35,20,0.8,1,RandomWalkRobot)
+               ]
     
-    foreach r in 
-    
-    pylab.plot(SRdata,'r', label='Standard robot')
-    pylab.plot(RRdata,'b', label='Random robot')
+    roomAreas = [225, 300,400, 625, 700]
+
+
+    pylab.plot(roomAreas,standardR,'r', label='Standard robot')
+    pylab.plot(roomAreas,RandomR,'b', label='Random robot')
     pylab.title("Time to Clean 80% of a room with different Robot mechanics")
+    pylab.xlabel("Room Areas")
     pylab.ylabel("Average time")
     pylab.legend()
     pylab.show()
