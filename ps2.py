@@ -1,7 +1,7 @@
 # Problem Set 6: Simulating robots
-# Name:
-# Collaborators:
-# Time:
+# Name: Ebunrere Adebanjo
+# Collaborators: Michael Agyo
+# Time: 1 1/2 hours(most likely more)
 
 import math
 import random
@@ -9,7 +9,6 @@ import random
 import ps2_visualize
 import pylab
 
-import numpy as np
 # === Provided classes
 
 class Position(object):
@@ -63,7 +62,7 @@ class Tile(object):
 def TileFromPos(pos):
     """Returns a tile when giving a Positon as an argument"""
     return Tile(math.floor(pos.x), math.floor(pos.y))
-    
+
 def generateTiles(upperWidth, upperHeight, lowerWidth =0, lowerHeight =0 ):
     """Generates a list of Tiles that should be used in the rectangular room object,
     and store information about whether thy have been cleaned or not"""
@@ -176,6 +175,7 @@ class RectangularRoom(object):
             return False
     
     def getUncleanTiles(self):
+        """Returns a list of unclean Tiles when called"""
         uncleanTiles = []
         for tile in self.Tiles:
             if tile.IsCleaned == False:
@@ -242,29 +242,25 @@ class Robot(object):
         """
         self.Direction = direction
 
-    def canMoveToFutureTile(self, direction):
+    def updatePositionAndClean(self):
         """
-        Checks if the robot continuing on his present trajectory,
-        would lead it to be out of  the room boundary.
+        Simulate the raise passage of a single time-step.
 
-        Parameters: Takes a Position as an argument
-
-        Returns: bool
+        Move the robot to a new position and mark the tile it is on as having
+        been cleaned.
         """
-        pos = self.getRobotPosition()
+        self.setRobotPosition(self.Position.getNewPosition)
+        self.room.cleanTileAtPosition(self.Position)
 
-        futurePos = pos.getNewPosition(direction, self.speed)
-            
-        isInRoom = self.room.isPositionInRoom(futurePos)
-        tile = TileFromPos(futurePos)
-        if tile.IsCleaned == True and isInRoom:
-            return True
-        else:
-            return False
-
+# === Helper Methods
     def getDirectionToTile(self, pos, tile):
+        """Get's the direction to a tile given a Position.
+        pos : Position object
+        tile : The Tile you want to move to
+        
+        Returns: the direction as an int
+        """
         refTile = TileFromPos(pos)
-
         if(refTile.X > tile.X and refTile.Y < tile.Y):
             return 315
         elif refTile.X == tile.X and refTile.Y < tile.Y:
@@ -282,37 +278,6 @@ class Robot(object):
         elif refTile.X < tile.X and refTile.Y > tile.Y:
             return 135
         
-    def updatePositionAndClean(self):
-        """
-        Simulate the raise passage of a single time-step.
-
-        Move the robot to a new position and mark the tile it is on as having
-        been cleaned.
-        """
-        self.setRobotPosition(self.Position.getNewPosition)
-        self.room.cleanTileAtPosition(self.Position)
-
-
-# === Problem 2
-class StandardRobot(Robot):
-    """
-    A StandardRobot is a Robot with the standard movement strategy.
-
-    At each time-step, a StandardRobot attempts to move in its current direction; when
-    it hits a wall, it chooses a new direction randomly.
-    """
-    # ==== Helper Methods
-
-    def surroundingTiles(self, refTile):
-        xRange = range(refTile.X - 1, refTile.X + 2)
-        yRange = range(refTile.Y -1, refTile.Y +2)
-        uncleanTiles = self.room.getUncleanTiles()
-        surroundingTiles = []
-        for t in uncleanTiles:
-            if t.X in xRange and t.Y in yRange:
-                surroundingTiles.append(t)
-        return surroundingTiles
-
     def canMoveToFutureTile(self, direction):
         """
         Checks if the robot continuing on his present trajectory,
@@ -333,26 +298,39 @@ class StandardRobot(Robot):
         else:
             return False
 
-    def getDirectionToTile(self, pos, tile):
-        refTile = TileFromPos(pos)
+# === Problem 2
+class StandardRobot(Robot):
+    """
+    A StandardRobot is a Robot with the standard movement strategy.
 
-        if(refTile.X > tile.X and refTile.Y < tile.Y):
-            return 315
-        elif refTile.X == tile.X and refTile.Y < tile.Y:
-            return 0
-        elif refTile.X < tile.X and refTile.Y < tile.Y:
-            return 45
-        elif refTile.X > tile.X and refTile.Y == tile.Y:
-            return 270
-        elif refTile.X < tile.X and refTile.Y== tile.Y:
-            return 90
-        elif refTile.X > tile.X and refTile.Y > tile.Y:
-            return 225
-        elif refTile.X== tile.X  and refTile.Y > tile.Y:
-            return 180
-        elif refTile.X < tile.X and refTile.Y > tile.Y:
-            return 135
+    At each time-step, a StandardRobot attempts to move in its current direction; when
+    it hits a wall, it chooses a new direction randomly.
+    """
+    # ==== Helper Methods
+
+    def surroundingTiles(self, refTile):
+        """Get's a list of the tiles that are surround a reference tile that have not been cleaned
+
+        Args:
+            refTile (Tile): reference tile in question
+
+        Returns:
+            list[Tile]: list of viable tiles around the reference tile
+        """
+        xRange = range(refTile.X - 1, refTile.X + 2)
+        yRange = range(refTile.Y -1, refTile.Y +2)
+        uncleanTiles = self.room.getUncleanTiles()
+        surroundingTiles = []
+        for t in uncleanTiles:
+            if t.X in xRange and t.Y in yRange:
+                surroundingTiles.append(t)
+        return surroundingTiles
+
     def obviousPath(self):
+        """This method lifts the heavy load in the Standard Robot class, it determines when to 
+        change the robots direction and by what amount. It takes into account it's surroundings and
+        places the robot adequately
+        """
         i = 0
         reftile =  TileFromPos(self.Position)
         surroundings = self.surroundingTiles(reftile)
@@ -413,7 +391,7 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
     robot_type: class of robot to be instantiated (e.g. Robot or
                 RandomWalkRobot)
     """
-    anim = ps2_visualize.RobotVisualization(num_robots, width, height, delay = 0.01)
+    # anim = ps2_visualize.RobotVisualization(num_robots, width, height)
     room = RectangularRoom(width,height)
     robots = []
 
@@ -430,14 +408,14 @@ def runSimulation(num_robots, speed, width, height, min_coverage, num_trials,
             for r in robots : #we're going to loop thru each robot and update pos
                 r.updatePositionAndClean()
 
-            anim.update(room, robots)
+            # anim.update(room, robots)
             timesteps += 1
 
         times.append(timesteps)
-        anim.done()
+        # anim.done()
         i += 1
 
-    return sum(times)/len(times)
+    return sum(times)/len(times) # mean time 
 
 
 # === Problem 4
@@ -451,16 +429,16 @@ def showPlot1():
     """
     Produces a plot showing dependence of cleaning time on number of robots.
     """ 
-    oneR = [1,runSimulation(1,1,20,20,0.8,1,StandardRobot)]
-    twoR = [2,runSimulation(2,1,20,20,0.8,1,StandardRobot)]
-    threeR = [3,runSimulation(3,1,20,20,0.8,1,StandardRobot)]
-    fourR = [4, runSimulation(4,1,20,20,0.8,1,StandardRobot)]
-    fiveR = [5, runSimulation(5,1,20,20,0.8,1,StandardRobot)]
-    sixR = [6,runSimulation(6,1,20,20,0.8,1,StandardRobot)]
-    sevR = [7,runSimulation(7,1,20,20,0.8,1,StandardRobot)]
-    eigR = [8,runSimulation(8,1,20,20,0.8,1,StandardRobot)]
-    nineR = [9,runSimulation(9,1,20,20,0.8,1,StandardRobot)]
-    tenR =[10, runSimulation(10,1,20,20,0.8,1,StandardRobot)]
+    oneR = [1,runSimulation(1,1,20,20,0.8,2,StandardRobot)]
+    twoR = [2,runSimulation(2,1,20,20,0.8,2,StandardRobot)]
+    threeR = [3,runSimulation(3,1,20,20,0.8,2,StandardRobot)]
+    fourR = [4, runSimulation(4,1,20,20,0.8,2,StandardRobot)]
+    fiveR = [5, runSimulation(5,1,20,20,0.8,2,StandardRobot)]
+    sixR = [6,runSimulation(6,1,20,20,0.8,2,StandardRobot)]
+    sevR = [7,runSimulation(7,1,20,20,0.8,2,StandardRobot)]
+    eigR = [8,runSimulation(8,1,20,20,0.8,2,StandardRobot)]
+    nineR = [9,runSimulation(9,1,20,20,0.8,2,StandardRobot)]
+    tenR =[10, runSimulation(10,1,20,20,0.8,2,StandardRobot)]
 
     xdata = [oneR[0], twoR[0],threeR[0], fourR[0], fiveR[0], sixR[0],sevR[0], eigR[0], nineR[0], tenR[0]]
     ydata = [oneR[1], twoR[1],threeR[1], fourR[1], fiveR[1], sixR[1],sevR[1], eigR[1], nineR[1], tenR[1]]
@@ -471,29 +449,29 @@ def showPlot1():
     pylab.xlabel("Number of robots")
     pylab.show()
 
-#showPlot1()
+showPlot1()
 
 def showPlot2():
     """
     Produces a plot showing dependence of cleaning time on room shape.
     """
-    oneR = [20 * 20,runSimulation(2,1,20,20,0.8,1,StandardRobot)]
-    twoR = [25 * 16,runSimulation(2,1,25,16,0.8,1,StandardRobot)]
-    threeR = [40 * 10,runSimulation(2,1,40,10,0.8,1,StandardRobot)]
-    fourR = [50 * 8, runSimulation(2,1,50,8,0.8,1,StandardRobot)]
-    fiveR = [80 * 5, runSimulation(2,1,80,5,0.8,1,StandardRobot)]
-    sixR = [100 * 4,runSimulation(2,1,100,4,0.8,1,StandardRobot)]
+    oneR = ['20 * 20',runSimulation(2,1,20,20,0.8,2,StandardRobot)]
+    twoR =   ["25 * 16",runSimulation(2,1,25,16,0.8,2,StandardRobot)]
+    threeR = ["40 * 10",runSimulation(2,1,40,10,0.8,2,StandardRobot)]
+    fourR =  ["50 * 8", runSimulation(2,1,50,8,0.8,2,StandardRobot)]
+    fiveR =  ["80 * 5", runSimulation(2,1,80,5,0.8,2,StandardRobot)]
+    sixR =   ["100 * 4",runSimulation(2,1,100,4,0.8,2,StandardRobot)]
 
-    ydata = [oneR[0], twoR[0],threeR[0], fourR[0], fiveR[0], sixR[0]]
-    xdata = [oneR[1], twoR[1],threeR[1], fourR[1], fiveR[1], sixR[1]]
+    xdata = [oneR[0], twoR[0],threeR[0], fourR[0], fiveR[0], sixR[0]]
+    ydata = [oneR[1], twoR[1],threeR[1], fourR[1], fiveR[1], sixR[1]]
     
     pylab.plot(xdata, ydata)
     pylab.title("Time to Clean 80% of square rooms with different sizes, with 2 Robots ")
-    pylab.xlabel("Average time")
-    pylab.ylabel("Number of Tiles")
+    pylab.ylabel("Average time")
+    pylab.xlabel("Shape of Room")
     pylab.show()
 
-#showPlot2()
+showPlot2()
 # === Problem 5
 
 class RandomWalkRobot(Robot):
@@ -502,6 +480,14 @@ class RandomWalkRobot(Robot):
     chooses a new direction at random after each time-step.
     """
     def surroundingTiles(self, refTile):
+        """Get's a list of the tiles that are surround a reference tile
+
+        Args:
+            refTile (Tile): reference tile in question
+
+        Returns:
+            list[Tile]: list of tiles around the reference tile
+        """
         xRange = range(refTile.X - 1, refTile.X + 2)
         yRange = range(refTile.Y -1, refTile.Y +2)
         surroundingTiles = []
@@ -511,6 +497,10 @@ class RandomWalkRobot(Robot):
         return surroundingTiles
     
     def obscurePath(self):
+        """This method lifts the heavy load in the Random Robot class, it determines when to 
+        change the robots direction and by what amount. It randomly selects a position from 
+        the surrounding tiles and set's it as the robot's direction.
+        """
         i = 0
         reftile =  TileFromPos(self.Position)
         surroundings = self.surroundingTiles(reftile)
@@ -520,8 +510,6 @@ class RandomWalkRobot(Robot):
                 directionToTile = self.getDirectionToTile(self.Position,surroundings[i])
                 if directionToTile != None:
                     directions.append(directionToTile)
-            # else:
-            #     continue
             i += 1
 
         self.setRobotDirection(random.choice(directions))
@@ -549,15 +537,32 @@ def showPlot3():
     """
     Produces a plot comparing the two robot strategies.
     """
-    standardR = [20 *20,runSimulation(1,1,20,20,0.8,1,StandardRobot)]
-    RandomR = [20 * 20,runSimulation(1,1,20,20,0.8,1,RandomWalkRobot)]
     
-    SRdata = [standardR[0], standardR[1]]
-    RRdata = [RandomR[0], RandomR[1]]
+    #==== Observations
+    # From the plots it is obvious that the standard robot has more efficient movement 
+    # than the random walk robot, showing as much as a seven times performance
     
-    pylab.plot(SRdata,'r', label='Standard robot')
-    pylab.plot(RRdata,'b', label='Random robot')
+    standardR = [runSimulation(2,1,15,15,0.8,2,StandardRobot),
+                 runSimulation(2,1,20,15,0.8,2,StandardRobot),
+                 runSimulation(1,1,20,20,0.8,2,StandardRobot),
+                 runSimulation(2,1,25,25,0.8,2,StandardRobot),
+                 runSimulation(2,1,35,20,0.8,2,StandardRobot)
+                 ]
+    
+    RandomR = [runSimulation(2,1,15,15,0.8,2,RandomWalkRobot),
+               runSimulation(2,1,20,15,0.8,2,RandomWalkRobot),
+               runSimulation(1,1,20,20,0.8,2,RandomWalkRobot),
+               runSimulation(2,1,25,25,0.8,2,RandomWalkRobot),
+               runSimulation(2,1,35,20,0.8,2,RandomWalkRobot)
+               ]
+    
+    roomAreas = [225, 300,400, 625, 700]
+
+
+    pylab.plot(roomAreas,standardR,'r', label='Standard robot')
+    pylab.plot(roomAreas,RandomR,'b', label='Random robot')
     pylab.title("Time to Clean 80% of a room with different Robot mechanics")
+    pylab.xlabel("Room Areas")
     pylab.ylabel("Average time")
     pylab.legend()
     pylab.show()
