@@ -1,7 +1,7 @@
 # Problem Set 6: Simulating robots
 # Name: Ebunrere Adebanjo
-# Collaborators: Michael Agyo
-# Time: 1 1/2 hours(most likely more)
+# Collaborators: Michael Agyo, Princewill Vincent
+# Time: 1 1/2 hours +
 
 import math
 import random
